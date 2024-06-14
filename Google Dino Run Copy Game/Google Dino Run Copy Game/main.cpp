@@ -1,55 +1,60 @@
 #pragma comment(lib, "Opengl32.lib")
 #include <GLFW/glfw3.h>
+#include <vector>
 #include "Object.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
-
 int main() {
-    // GLFW 초기화
+    // Initialize GLFW
     if (!glfwInit()) {
         return -1;
     }
 
-    // GLFW 윈도우 생성 및 설정
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Google Dino Run Copy Game", NULL, NULL);
+    // Create a windowed mode window and its OpenGL context
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Game Window", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
 
-    // 윈도우를 현재 컨텍스트로 설정
+    // Make the window's context current
     glfwMakeContextCurrent(window);
-
-    // Viewport 설정
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glViewport(0, 0, 800, 600);
-
-    // 배경색 설정 (하늘색: R=0, G=30, B=100)
     glClearColor(0.0f, 0.12f, 0.39f, 1.0f);
 
-    Object player(0.0f, 0.0f, 0.5f, 0.03f);
-    
+    // Initialize objects
+    Player player(20.0f, 3.0f); // 플레이어 생성 (50cm, 3cm)
+    Ground ground(10.0f); // 지면 생성 (바닥으로부터 100cm)
 
+    std::vector<Obstacle> obstacles;
+    obstacles.emplace_back(5.0f, 10.0f); // 장애물 생성 (가로 50cm, 높이 100cm)
+    obstacles.emplace_back(5.0f, 30.0f); // 장애물 생성 (가로 50cm, 높이 300cm)
 
-    // 메인 루프
+    float obstacleSpacing = 300.0f; // 장애물 간의 가로 간격 (임의로 설정)
+
+    // Loop until the user closes the window
     while (!glfwWindowShouldClose(window)) {
-        // 버퍼 지우기
+        // Render here, e.g. clear the screen
         glClear(GL_COLOR_BUFFER_BIT);
 
-        player.Draw();
-        
+        // Draw ground
+        ground.draw();
 
-        
+        // Draw player
+        player.draw();
 
-        // 버퍼 교환
+        // Draw obstacles
+        float startX = 0.0f;
+        for (const auto& obstacle : obstacles) {
+            obstacle.draw(startX);
+            startX += obstacleSpacing;
+        }
+
+        // Swap front and back buffers
         glfwSwapBuffers(window);
-        // 이벤트 처리
+
+        // Poll for and process events
         glfwPollEvents();
     }
 
-    // GLFW 종료
     glfwTerminate();
     return 0;
 }

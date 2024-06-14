@@ -1,39 +1,76 @@
-#ifndef OBJECT_H
-#define OBJECT_H
-
 #include <GLFW/glfw3.h>
 
-class Object {
+class Player {
+private:
+    float size; // 정사각형 한 변의 길이 (meter)
+    float borderThickness; // 테두리 두께 (meter)
+
 public:
-    float x, y; // 물체 위치 (미터 단위, 좌측 하단 기준)
-    float size; // 한 변의 길이 (미터 단위)
-    float borderThickness; // 테두리 두께 (미터 단위)
+    Player(float size_cm, float border_thickness_cm) {
+        size = size_cm / 100.0f; // cm를 meter로 변환
+        borderThickness = border_thickness_cm / 100.0f; // cm를 meter로 변환
+    }
 
-    Object(float xpos, float ypos, float s, float border)
-        : x(xpos), y(ypos), size(s), borderThickness(border) {}
+    void draw() const {
+        // Draw filled red square (player)
+        glColor3ub(255, 0, 0);
+        glBegin(GL_QUADS);
+        glVertex2f(-size / 2, -size / 2);
+        glVertex2f(size / 2, -size / 2);
+        glVertex2f(size / 2, size / 2);
+        glVertex2f(-size / 2, size / 2);
+        glEnd();
 
-    void Draw() const;
+        // Draw border
+        glColor3ub(0, 0, 0); // black border color
+        glLineWidth(borderThickness);
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(-size / 2, -size / 2);
+        glVertex2f(size / 2, -size / 2);
+        glVertex2f(size / 2, size / 2);
+        glVertex2f(-size / 2, size / 2);
+        glEnd();
+    }
 };
+class Ground {
+private:
+    float heightFromGround; // 바닥으로부터의 높이 (meter)
 
-void Object::Draw() const {
-    // OpenGL을 이용한 물체 그리기 코드 (예시)
-    glBegin(GL_QUADS);
+public:
+    Ground(float height_from_ground_cm) {
+        heightFromGround = height_from_ground_cm / 100.0f; // cm를 meter로 변환
+    }
 
-    // 플레이어 (빨간색 정사각형)
-    glColor3ub(255, 0, 0); // 빨간색
-    glVertex2f(x, y);
-    glVertex2f(x + size, y);
-    glVertex2f(x + size, y + size);
-    glVertex2f(x, y + size);
+    void draw() const {
+        // Draw ground
+        glColor3ub(255, 200, 15); // 황색 (R:255, G:200, B:15)
+        glBegin(GL_QUADS);
+        glVertex2f(-1.0f, -heightFromGround); // 왼쪽 아래
+        glVertex2f(1.0f, -heightFromGround); // 오른쪽 아래
+        glVertex2f(1.0f, -1.0f); // 오른쪽 위
+        glVertex2f(-1.0f, -1.0f); // 왼쪽 위
+        glEnd();
+    }
+};
+class Obstacle {
+private:
+    float width; // 가로 길이 (meter)
+    float height; // 세로 길이 (meter)
 
-    // 플레이어 테두리 (검정색 테두리)
-    glColor3ub(255, 0, 0); // 검정색
-    glVertex2f(x - borderThickness, y - borderThickness);
-    glVertex2f(x + size + borderThickness, y - borderThickness);
-    glVertex2f(x + size + borderThickness, y + size + borderThickness);
-    glVertex2f(x - borderThickness, y + size + borderThickness);
+public:
+    Obstacle(float width_cm, float height_cm) {
+        width = width_cm / 100.0f; // cm를 meter로 변환
+        height = height_cm / 100.0f; // cm를 meter로 변환
+    }
 
-    glEnd();
-}
-
-#endif // OBJECT_H
+    void draw(float x_position) const {
+        // Draw obstacle (green color)
+        glColor3ub(0, 255, 0); // 녹색 (R:0, G:255, B:0)
+        glBegin(GL_QUADS);
+        glVertex2f(x_position - width / 2, -1.0f); // 왼쪽 아래
+        glVertex2f(x_position + width / 2, -1.0f); // 오른쪽 아래
+        glVertex2f(x_position + width / 2, -1.0f + height); // 오른쪽 위
+        glVertex2f(x_position - width / 2, -1.0f + height); // 왼쪽 위
+        glEnd();
+    }
+};
